@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="CuadradoAPI.Blazor/CuadradoAPI.Blazor.csproj" />
+  <Project Path="CuadradoAPI.csproj" />
+  <Project Path="CuadradoAPI.WinForms/CuadradoAPI.WinForms.csproj" />
+</Solution>

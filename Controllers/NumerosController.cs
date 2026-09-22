@@ -1,7 +1,6 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using CuadradoAPI.Models;
 
 namespace CuadradoAPI.Controllers
 {
@@ -16,13 +15,13 @@ namespace CuadradoAPI.Controllers
             _configuration = configuration;
         }
 
-        // GET: api/Numeros
         [HttpGet]
-        public async Task<IActionResult> GetNumeros()
+        public async Task<IActionResult> GetProductos()
         {
             try
             {
-                string? connectionString = _configuration.GetConnectionString("DefaultConnection");
+                string? connectionString =
+                    _configuration.GetConnectionString("DefaultConnection");
 
                 if (string.IsNullOrWhiteSpace(connectionString))
                 {
@@ -32,69 +31,31 @@ namespace CuadradoAPI.Controllers
                     });
                 }
 
-                using var connection = new SqlConnection(connectionString);
+                using var connection =
+                    new SqlConnection(connectionString);
 
-                string sql = "SELECT Id, Numero AS Valor, Cuadrado FROM Numeros";
+                string sql =
+                    "SELECT Id, Nombre, Precio FROM Productos";
 
-                var numeros = await connection.QueryAsync<Numero>(sql);
+                var productos =
+                    await connection.QueryAsync<Producto>(sql);
 
-                return Ok(numeros);
+                return Ok(productos);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new
                 {
-                    error = ex.Message,
-                    detalle = ex.InnerException?.Message
+                    error = ex.Message
                 });
             }
         }
+    }
 
-        // POST: api/Numeros
-        [HttpPost]
-        public async Task<IActionResult> GuardarNumero([FromBody] Numero numero)
-        {
-            try
-            {
-                string? connectionString = _configuration.GetConnectionString("DefaultConnection");
-
-                if (string.IsNullOrWhiteSpace(connectionString))
-                {
-                    return StatusCode(500, new
-                    {
-                        error = "No se encontró la cadena de conexión."
-                    });
-                }
-
-                using var connection = new SqlConnection(connectionString);
-
-                // Calcular el cuadrado
-                numero.Cuadrado = numero.Valor * numero.Valor;
-
-                string sql = @"
-                    INSERT INTO Numeros (Numero, Cuadrado)
-                    VALUES (@Valor, @Cuadrado);
-
-                    SELECT CAST(SCOPE_IDENTITY() AS INT);";
-
-                int id = await connection.ExecuteScalarAsync<int>(sql, numero);
-
-                numero.Id = id;
-
-                return Ok(new
-                {
-                    mensaje = "Número guardado correctamente",
-                    datos = numero
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    error = ex.Message,
-                    detalle = ex.InnerException?.Message
-                });
-            }
-        }
+    public class Producto
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; } = "";
+        public decimal Precio { get; set; }
     }
 }
